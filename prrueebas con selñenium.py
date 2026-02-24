@@ -16,15 +16,6 @@ import csv
 
 #=============================================================================================
 
-import time
-import csv
-import os
-from datetime import datetime
-from selenium.webdriver.common.by import By
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as ec
-from selenium.webdriver.common.keys import Keys
-
 # --- FUNCIÓN 1: EXTRAER DATOS ---
 def extraer_datos_financieros(driver, ticker):
     print(f"Buscando información de: {ticker}...")
@@ -145,53 +136,3 @@ except Exception as e:
 
 finally:
     driver.quit()
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-# botton_usd = driver.find_element(By.ID,'tab-US')
-# botton_usd.click()
-
-
-# barra_buscar = driver.find_element(By.ID,"ybar-sbq")
-# barra_buscar.send_keys('BTC-USD')
-
-# boton_busqueda =driver.find_element(By.ID,'ybar-search').click()
-
-# elemento_precio_btc = WebDriverWait(driver,10).until(
-#     ec.visibility_of_element_located((By.CSS_SELECTOR,'[data-testid="qsp-price"]'))
-# )
-
-# precio_accion = elemento_precio_btc.text
-# print(precio_accion)
-
-
-# campos_datos = WebDriverWait(driver,10).until(
-#     ec.visibility_of_all_elements_located((By.CSS_SELECTOR,'span[class="label yf-6myrf1"]'))
-#     )
-# campos_ressultado = driver.find_elements(By.CSS_SELECTOR,'span[class="value yf-6myrf1"]')
-
-# for indice, campo in enumerate(campos_datos):
-#     resultado = campos_ressultado[indice]
-#     print(f'{indice}: {campo.text}: {resultado.text}')
-
-# sleep(10)
-
-#boton = driver.find_element(By.XPATH, "//button[./svg[@aria-label='icon']]")
