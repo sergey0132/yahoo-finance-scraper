@@ -31,9 +31,15 @@ from funciones_obreras import extraer_datos_financieros, guardar_en_csv
 #     time.sleep(1) 
 #     barra_buscar.send_keys(Keys.ENTER)
 
+<<<<<<< HEAD
 #     # Pausa "tonta" de 4 segundos. Obligatoria para dar tiempo a que cambie la URL 
 #     # y evitar Race Conditions (que no se mezclen datos de Bitcoin con los de Apple).
 #     time.sleep(4) 
+=======
+# --- FUNCIÓN 1: EXTRAER DATOS ---
+def extraer_datos_financieros(driver, ticker):
+    print(f"Buscando información de: {ticker}...")
+>>>>>>> 54276c67f7cde94cd77c981d1faf8a310fff7edb
     
 #     # Pausa "inteligente": Espera HASTA 10 seg a que aparezca el precio. Si aparece en el seg 1, avanza.
 #     selector_precio = '[data-testid="qsp-price"], .livePrice span'
@@ -98,6 +104,7 @@ def main():
     # Inicializamos el driver (Selenium 4+ se encarga de buscarlo/instalarlo solo)
     driver = webdriver.Edge(options=opciones) 
 
+<<<<<<< HEAD
     try:
         driver.get("https://es.finance.yahoo.com")
         driver.set_window_size(1920, 1080)
@@ -198,3 +205,7 @@ if __name__ == "__main__":
 # sleep(10)
 
 #boton = driver.find_element(By.XPATH, "//button[./svg[@aria-label='icon']]")
+=======
+finally:
+    driver.quit()
+>>>>>>> 54276c67f7cde94cd77c981d1faf8a310fff7edb
