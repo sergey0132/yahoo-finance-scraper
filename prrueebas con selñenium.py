@@ -1,150 +1,153 @@
+# ==========================================
+# 1. IMPORTACIONES (La caja de herramientas)
+# ==========================================
+# Herramientas nativas de Python:
+import time         # Para hacer pausas (ej. time.sleep)
+import csv          # Para crear y escribir en archivos .csv
+import os           # Para interactuar con tu sistema (ej. ver si existe un archivo)
+from datetime import datetime # Para guardar la hora exacta de la extracción
+
+# Herramientas de Selenium (El "robot" virtual):
 from selenium import webdriver
-import time
-from selenium.webdriver.common.by import By
-from selenium.webdriver.edge.service import Service
-from time import sleep
-from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.edge.options import Options # Para configurar el modo invisible (headless)
+from selenium.webdriver.common.by import By         # Para buscar elementos (por ID, Clase, etc.)
+from selenium.webdriver.support.ui import WebDriverWait # Para pausas "inteligentes"
 from selenium.webdriver.support import expected_conditions as ec
-from selenium.webdriver.chrome.options import Options
-from selenium.webdriver.edge.service import Service as EdgeService
-from webdriver_manager.microsoft import EdgeChromiumDriverManager
-from selenium.webdriver.common.keys import Keys
-import pandas as pd
-import os
-from datetime import datetime
-import csv
+from selenium.webdriver.common.keys import Keys     # Para simular teclas (ej. ENTER)
 
-#=============================================================================================
+# Funciones secundarias (Los obreros)
+from funciones_obreras import extraer_datos_financieros, guardar_en_csv
+# ==========================================
+# 2. FUNCIONES SECUNDARIAS (Los obreros)
+# ==========================================
+# def extraer_datos_financieros(driver, ticker):
+#     """Entra a Yahoo Finance, busca el ticker y extrae los datos."""
+#     print(f"Buscando información de: {ticker}...")
+    
+#     # Simulamos que un humano escribe y pulsa ENTER (más seguro que hacer clic en la lupa)
+#     barra_buscar = driver.find_element(By.ID, "ybar-sbq")
+#     barra_buscar.clear() 
+#     barra_buscar.send_keys(ticker)
+#     time.sleep(1) 
+#     barra_buscar.send_keys(Keys.ENTER)
 
-import time
-import csv
-import os
-from datetime import datetime
-from selenium.webdriver.common.by import By
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as ec
-from selenium.webdriver.common.keys import Keys
-
-# --- FUNCIÓN 1: EXTRAER DATOS ---
-def extraer_datos_financieros(driver, ticker):
-    print(f"Buscando información de: {ticker}...")
+#     # Pausa "tonta" de 4 segundos. Obligatoria para dar tiempo a que cambie la URL 
+#     # y evitar Race Conditions (que no se mezclen datos de Bitcoin con los de Apple).
+#     time.sleep(4) 
     
-    # 1. Búsqueda segura (Usando ENTER en lugar de clic para que no falle con divisas)
-    barra_buscar = driver.find_element(By.ID, "ybar-sbq")
-    barra_buscar.clear() 
-    barra_buscar.send_keys(ticker)
-    time.sleep(1) # Pequeña pausa para que Yahoo despliegue opciones
-    barra_buscar.send_keys(Keys.ENTER)
-
-    time.sleep(4)
+#     # Pausa "inteligente": Espera HASTA 10 seg a que aparezca el precio. Si aparece en el seg 1, avanza.
+#     selector_precio = '[data-testid="qsp-price"], .livePrice span'
+#     elemento_precio = WebDriverWait(driver, 10).until(
+#         ec.visibility_of_element_located((By.CSS_SELECTOR, selector_precio))
+#     )
     
-    # 2. Captura del precio principal (con un selector universal)
-    selector_precio = '[data-testid="qsp-price"], .livePrice span'
-    elemento_precio = WebDriverWait(driver, 10).until(
-        ec.visibility_of_element_located((By.CSS_SELECTOR, selector_precio))
-    )
+#     # Preparamos la "caja" (diccionario) con los primeros datos
+#     datos_extraidos = {
+#         'Fecha_Captura': datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+#         'Ticker': ticker,
+#         'Precio_Actual': elemento_precio.text
+#     }
     
-    # 3. Preparamos el Diccionario con los datos fijos básicos
-    datos_extraidos = {
-        'Fecha_Captura': datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-        'Ticker': ticker,
-        'Precio_Actual': elemento_precio.text
-    }
+#     # Capturamos todas las etiquetas de la tabla (ej. "Volumen") y sus valores (ej. "1.2B")
+#     campos_datos = WebDriverWait(driver, 10).until(
+#         ec.visibility_of_all_elements_located((By.CSS_SELECTOR, 'span[class="label yf-6myrf1"]'))
+#     )
+#     campos_ressultado = driver.find_elements(By.CSS_SELECTOR, 'span[class="value yf-6myrf1"]')
     
-    # 4. Captura de la tabla (Tu código original, pero guardando en el diccionario)
-    campos_datos = WebDriverWait(driver, 10).until(
-        ec.visibility_of_all_elements_located((By.CSS_SELECTOR, 'span[class="label yf-6myrf1"]'))
-    )
-    campos_ressultado = driver.find_elements(By.CSS_SELECTOR, 'span[class="value yf-6myrf1"]')
-    
-    for indice, campo in enumerate(campos_datos):
-        if indice < len(campos_ressultado):
-            nombre_columna = campo.text
-            valor_columna = campos_ressultado[indice].text
-            # Añadimos cada fila de la tabla como una columna nueva en nuestro diccionario
-            datos_extraidos[nombre_columna] = valor_columna
+#     # Emparejamos cada etiqueta con su valor y lo metemos en nuestro diccionario
+#     for indice, campo in enumerate(campos_datos):
+#         if indice < len(campos_ressultado):
+#             datos_extraidos[campo.text] = campos_ressultado[indice].text
             
-    return datos_extraidos
+#     return datos_extraidos
 
-
-# --- FUNCIÓN 2: GUARDAR POR CATEGORÍA ---
-def guardar_en_csv(categoria, datos_diccionario):
-    # Esto creará archivos como "datos_criptos.csv" o "datos_acciones.csv" automáticamente
-    nombre_archivo = f'datos_{categoria.lower()}.csv'
+# def guardar_en_csv(categoria, datos_diccionario):
+#     """Guarda la caja de datos en un archivo .csv sin borrar lo anterior."""
+#     nombre_archivo = f'datos_{categoria.lower()}.csv'
     
-    # Comprobamos si el archivo ya existe
-    archivo_existe = os.path.isfile(nombre_archivo)
+#     # Pregunta: "¿Existe ya este archivo en el disco duro?"
+#     archivo_existe = os.path.isfile(nombre_archivo)
+#     columnas = list(datos_diccionario.keys())
     
-    # Extraemos los nombres de las columnas directamente del diccionario que encontró Selenium
-    # Así, si las Criptos tienen 15 datos y las Acciones 8, se adapta solo.
-    columnas = list(datos_diccionario.keys())
-    
-    with open(nombre_archivo, mode='a', newline='', encoding='utf-8') as archivo:
-        escritor = csv.DictWriter(archivo, fieldnames=columnas)
+#     # mode='a' significa Append (Añadir). Escribe la nueva fila debajo de las que ya existen.
+#     with open(nombre_archivo, mode='a', newline='', encoding='utf-8') as archivo:
+#         escritor = csv.DictWriter(archivo, fieldnames=columnas)
         
-        # Si es la primera vez que se crea ESTE archivo, le ponemos la cabecera
-        if not archivo_existe:
-            escritor.writeheader()
-            
-        # Guardamos la fila de datos
-        escritor.writerow(datos_diccionario)
-
-
-#========================================================================================================
-
-s = Service(executable_path=r"C:\Users\serre\Downloads\edgedriver_win64\msedgedriver.exe.exe")
-driver = webdriver.Edge(service=s)
-
-driver.get("https://es.finance.yahoo.com")
-
-driver.maximize_window()
-
-try:
-    botton_aceptar = WebDriverWait(driver,10).until(
-            ec.element_to_be_clickable((By.NAME, 'agree'))
-    )
-    botton_aceptar.click()
-    time.sleep(2.5)
-    print('Coockies enconttrados y aceptados')
-except Exception:
-    print('No se encontraron Coockies')
-    pass
-
-# --- CONFIGURACIÓN DE TU CARTERA ---
-# Aquí separas claramente qué es cada cosa
-cartera = {
-    "Criptos": ['BTC-USD', 'ETH-USD'],
-    "Acciones": ['AAPL', 'TSLA'],
-    "Divisas": ['EURUSD=X']
-}
-
-# --- EJECUCIÓN PRINCIPAL ---
-try:
-    for categoria, lista_activos in cartera.items():
-        print(f"\n===== INICIANDO CATEGORÍA: {categoria.upper()} =====")
+#         # Si es la primera vez que se crea, le ponemos los títulos de las columnas arriba del todo
+#         if not archivo_existe:
+#             escritor.writeheader()
         
-        for activo in lista_activos:
-            try:
-                # 1. Extraemos los datos de Yahoo Finance
-                diccionario_resultados = extraer_datos_financieros(driver, activo)
-                
-                # 2. Los guardamos en su CSV correspondiente
-                guardar_en_csv(categoria, diccionario_resultados)
-                
-                print(f"✅ Guardado con éxito: {activo} en datos_{categoria.lower()}.csv")
-                
-                # Pausa de seguridad para no saturar a Yahoo Finance
-                time.sleep(2) 
-                
-            except Exception as e:
-                print(f"❌ Error al procesar {activo}: {e}")
-                # Si falla una, el bucle 'for' sigue automáticamente con la siguiente
+#         # Guardamos la fila de datos
+#         escritor.writerow(datos_diccionario)
 
-except Exception as e:
-    print(f"Ocurrió un error crítico: {e}")
+# ==========================================
+# 3. FUNCIÓN PRINCIPAL (El jefe de obra)
+# ==========================================
+def main():
+    """Coordina todo el proceso, inicializa el navegador y maneja los errores."""
+    print("Iniciando el Bot de Extracción Financiera...")
+    
+    # Le ponemos la "capa de invisibilidad" al navegador (Headless). 
+    # Trabaja en segundo plano sin usar ventanas físicas ni tarjeta gráfica.
+    opciones = Options()
+    opciones.add_argument("--headless") 
+    opciones.add_argument("--disable-gpu")
+    opciones.add_argument("--no-sandbox")
+    opciones.add_argument("--disable-dev-shm-usage")
+    
+    # Inicializamos el driver (Selenium 4+ se encarga de buscarlo/instalarlo solo)
+    driver = webdriver.Edge(options=opciones) 
 
-finally:
-    driver.quit()
+    try:
+        driver.get("https://es.finance.yahoo.com")
+        driver.set_window_size(1920, 1080)
+
+        # Manejo de Cookies: Intenta aceptarlas. Si no sale el pop-up, el 'except' evita que se cuelgue.
+        try:
+            botton_aceptar = WebDriverWait(driver, 5).until(
+                ec.element_to_be_clickable((By.NAME, 'agree'))
+            )
+            botton_aceptar.click()
+            time.sleep(2)
+            print('✅ Cookies encontradas y aceptadas')
+        except Exception:
+            print('ℹ️ No se encontraron Cookies (o ya estaban aceptadas)')
+
+        # Nuestra lista de tareas a extraer
+        cartera = {
+            "Criptos": ['BTC-USD', 'ETH-USD'],
+            "Acciones": ['AAPL', 'TSLA'],
+            "Divisas": ['EURUSD=X']
+        }
+
+        # Bucle de extracción: Recorre categorías y luego activos
+        for categoria, lista_activos in cartera.items():
+            print(f"\n===== INICIANDO CATEGORÍA: {categoria.upper()} =====")
+            for activo in lista_activos:
+                try: # Si falla un activo, el 'try' permite continuar con el siguiente sin parar el bot
+                    diccionario_resultados = extraer_datos_financieros(driver, activo)
+                    guardar_en_csv(categoria, diccionario_resultados)
+                    print(f"✅ Guardado con éxito: {activo}")
+                    time.sleep(2) 
+                except Exception as e:
+                    print(f"❌ Error al procesar {activo}: {e}")
+
+    except Exception as e:
+        print(f"Ocurrió un error crítico general: {e}")
+        
+    finally:
+        # Esta línea es VITAL. Pase lo que pase (incluso si hay error fatal o le das a Stop),
+        # cierra el proceso del navegador. Evita que la RAM de tu PC se sature de Edge fantasmas.
+        driver.quit()
+        print("\nNavegador cerrado. Fin del proceso.")
+
+# ==========================================
+# 4. PUNTO DE ENTRADA (El botón de encendido)
+# ==========================================
+# Seguro profesional: Solo ejecuta el código si le das al 'Play' directamente a este archivo.
+# Si mañana importas este bot desde otro archivo de Python, no se ejecutará a lo loco.
+if __name__ == "__main__":
+    main()
 
 
 
