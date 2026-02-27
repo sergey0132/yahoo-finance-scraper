@@ -17,78 +17,7 @@ from selenium.webdriver.common.keys import Keys     # Para simular teclas (ej. E
 
 # Funciones secundarias (Los obreros)
 from funciones_obreras import extraer_datos_financieros, guardar_en_csv
-# ==========================================
-# 2. FUNCIONES SECUNDARIAS (Los obreros)
-# ==========================================
-# def extraer_datos_financieros(driver, ticker):
-#     """Entra a Yahoo Finance, busca el ticker y extrae los datos."""
-#     print(f"Buscando información de: {ticker}...")
-    
-#     # Simulamos que un humano escribe y pulsa ENTER (más seguro que hacer clic en la lupa)
-#     barra_buscar = driver.find_element(By.ID, "ybar-sbq")
-#     barra_buscar.clear() 
-#     barra_buscar.send_keys(ticker)
-#     time.sleep(1) 
-#     barra_buscar.send_keys(Keys.ENTER)
 
-<<<<<<< HEAD
-#     # Pausa "tonta" de 4 segundos. Obligatoria para dar tiempo a que cambie la URL 
-#     # y evitar Race Conditions (que no se mezclen datos de Bitcoin con los de Apple).
-#     time.sleep(4) 
-=======
-# --- FUNCIÓN 1: EXTRAER DATOS ---
-def extraer_datos_financieros(driver, ticker):
-    print(f"Buscando información de: {ticker}...")
->>>>>>> 54276c67f7cde94cd77c981d1faf8a310fff7edb
-    
-#     # Pausa "inteligente": Espera HASTA 10 seg a que aparezca el precio. Si aparece en el seg 1, avanza.
-#     selector_precio = '[data-testid="qsp-price"], .livePrice span'
-#     elemento_precio = WebDriverWait(driver, 10).until(
-#         ec.visibility_of_element_located((By.CSS_SELECTOR, selector_precio))
-#     )
-    
-#     # Preparamos la "caja" (diccionario) con los primeros datos
-#     datos_extraidos = {
-#         'Fecha_Captura': datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-#         'Ticker': ticker,
-#         'Precio_Actual': elemento_precio.text
-#     }
-    
-#     # Capturamos todas las etiquetas de la tabla (ej. "Volumen") y sus valores (ej. "1.2B")
-#     campos_datos = WebDriverWait(driver, 10).until(
-#         ec.visibility_of_all_elements_located((By.CSS_SELECTOR, 'span[class="label yf-6myrf1"]'))
-#     )
-#     campos_ressultado = driver.find_elements(By.CSS_SELECTOR, 'span[class="value yf-6myrf1"]')
-    
-#     # Emparejamos cada etiqueta con su valor y lo metemos en nuestro diccionario
-#     for indice, campo in enumerate(campos_datos):
-#         if indice < len(campos_ressultado):
-#             datos_extraidos[campo.text] = campos_ressultado[indice].text
-            
-#     return datos_extraidos
-
-# def guardar_en_csv(categoria, datos_diccionario):
-#     """Guarda la caja de datos en un archivo .csv sin borrar lo anterior."""
-#     nombre_archivo = f'datos_{categoria.lower()}.csv'
-    
-#     # Pregunta: "¿Existe ya este archivo en el disco duro?"
-#     archivo_existe = os.path.isfile(nombre_archivo)
-#     columnas = list(datos_diccionario.keys())
-    
-#     # mode='a' significa Append (Añadir). Escribe la nueva fila debajo de las que ya existen.
-#     with open(nombre_archivo, mode='a', newline='', encoding='utf-8') as archivo:
-#         escritor = csv.DictWriter(archivo, fieldnames=columnas)
-        
-#         # Si es la primera vez que se crea, le ponemos los títulos de las columnas arriba del todo
-#         if not archivo_existe:
-#             escritor.writeheader()
-        
-#         # Guardamos la fila de datos
-#         escritor.writerow(datos_diccionario)
-
-# ==========================================
-# 3. FUNCIÓN PRINCIPAL (El jefe de obra)
-# ==========================================
 def main():
     """Coordina todo el proceso, inicializa el navegador y maneja los errores."""
     print("Iniciando el Bot de Extracción Financiera...")
@@ -104,7 +33,6 @@ def main():
     # Inicializamos el driver (Selenium 4+ se encarga de buscarlo/instalarlo solo)
     driver = webdriver.Edge(options=opciones) 
 
-<<<<<<< HEAD
     try:
         driver.get("https://es.finance.yahoo.com")
         driver.set_window_size(1920, 1080)
@@ -205,7 +133,3 @@ if __name__ == "__main__":
 # sleep(10)
 
 #boton = driver.find_element(By.XPATH, "//button[./svg[@aria-label='icon']]")
-=======
-finally:
-    driver.quit()
->>>>>>> 54276c67f7cde94cd77c981d1faf8a310fff7edb
