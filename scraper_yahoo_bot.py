@@ -9,7 +9,7 @@ from datetime import datetime # Para guardar la hora exacta de la extracción
 
 # Herramientas de Selenium (El "robot" virtual):
 from selenium import webdriver
-from selenium.webdriver.edge.options import Options # Para configurar el modo invisible (headless)
+from selenium.webdriver.chrome.options import Options # Para configurar el modo invisible (headless)
 from selenium.webdriver.common.by import By         # Para buscar elementos (por ID, Clase, etc.)
 from selenium.webdriver.support.ui import WebDriverWait # Para pausas "inteligentes"
 from selenium.webdriver.support import expected_conditions as ec
@@ -31,7 +31,7 @@ def main():
     opciones.add_argument("--disable-dev-shm-usage")
     
     # Inicializamos el driver (Selenium 4+ se encarga de buscarlo/instalarlo solo)
-    driver = webdriver.Edge(options=opciones) 
+    driver = webdriver.Chrome(options=opciones) 
 
     try:
         driver.get("https://es.finance.yahoo.com")
